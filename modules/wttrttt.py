@@ -1,7 +1,7 @@
 import requests
 
 
-class Wx1Fetcher:
+class Wx3Fetcher:
     def __init__(self, location):
         self.location = location
 
@@ -12,22 +12,23 @@ class Wx1Fetcher:
             response_text = response.text.replace("Partly ", "")
             response_text = response_text.replace("Light ", "")
             response_text = response_text.replace(" shower", "")
-            wx1_info = response_text.split()
-            location = wx1_info[0].strip()
-            condition = wx1_info[1].strip()
-            temperature = wx1_info[2].strip()
-            temperature = wx1_info[3].strip()
-            Humidity = wx1_info[4].strip()
-            wind = wx1_info[5].strip()
-            Precipitation = wx1_info[7].strip()
-            Pressure = wx1_info[6].strip()
-            dawn = wx1_info[-2].strip()
-            sunset = wx1_info[-1].strip()
+            wx3_info = response_text.split()
+            location = wx3_info[0].strip()
+            condition = wx3_info[1].strip()
+            temperature = wx3_info[2].strip()
+            temperature = wx3_info[3].strip()
+            Humidity = wx3_info[4].strip()
+            wind = wx3_info[5].strip()
+            Precipitation = wx3_info[7].strip()
+            Pressure = wx3_info[6].strip()
+            dawn = wx3_info[-2].strip()
+            sunset = wx3_info[-1].strip()
 
             emojis = {
-                "☁️": ["Cloudy", "Overcast", "cloudy"],
+                
+                "☁️": ["Cloudy", "Overcast", "cloudy"],
                 "🌤️": ["Partly", "Partly cloudy"],
-                "": ["Sunny", "Clear"],
+                "🌞": ["Sunny", "Clear"],
                 "🌧️": [
                     "Rain",
                     "rain",
@@ -51,6 +52,7 @@ class Wx1Fetcher:
                 ),
                 None,
             )
+           
             output = f"{location}\n"
             output += f"{selected_emoji} {condition}\n"
             output += f"temperature🌡️ {temperature}\n"
@@ -67,7 +69,7 @@ class Wx1Fetcher:
 
 
 # Example usage:
- #location = "Swansea"
-# weather_fetcher = Wx1Fetcher(location)
+# location = "Swansea"
+# weather_fetcher = WeatherFetcher(location)
 # weather_data = weather_fetcher.get_weather()
-#print(weather_data)
+# print(weather_data)

@@ -63,8 +63,11 @@ from modules.bbs import BBS
 from modules.tides import TidesScraper
 from modules.twin_cipher import TwinHexDecoder, TwinHexEncoder
 from modules.whois import Whois
-from modules.wttr import WeatherFetcher
-
+from modules.wttr import Wx1Fetcher
+from modules.wttrtt import Wx2Fetcher
+from modules.wttrttt import Wx3Fetcher
+from modules.floodwarn import FloodWarningsScraper
+from modules.weatherwarn import WeatherWarningsScraper
 
 def find_serial_ports():
     # Use the list_ports module to get a list of available serial ports
@@ -83,6 +86,8 @@ logger = logging.getLogger()
 
 # GLOBALS
 LOCATION = ""
+LOC2=""
+LOC3=""
 TIDE_LOCATION = ""
 MYNODE = ""
 MYNODES = ""
@@ -95,6 +100,8 @@ with open("settings.yaml", "r") as file:
     settings = yaml.safe_load(file)
 
 LOCATION = settings.get("LOCATION")
+LOC2 = settings.get("LOC2")
+LOC3 = settings.get("LOC3")
 TIDE_LOCATION = settings.get("TIDE_LOCATION")
 MYNODE = settings.get("MYNODE")
 MYNODES = settings.get("MYNODES")
@@ -112,7 +119,9 @@ logger.info(f"FIREWALL: {FIREWALL}")
 # except:
 #    logger.warning("Could not calculate location.  Using defaults")
 
-weather_fetcher = WeatherFetcher(LOCATION)
+wx1_fetcher = Wx1Fetcher(LOCATION)
+wx2_fetcher = Wx2Fetcher(LOC2)
+wx3_fetcher = Wx3Fetcher(LOC3)
 tides_scraper = TidesScraper(TIDE_LOCATION)
 bbs = BBS()
 transmission_count = 0
@@ -123,10 +132,15 @@ kill_all_robots = 0  # Assuming you missed defining kill_all_robots
 # Function to periodically refresh weather and tides data
 def refresh_data():
     while True:
-        global weather_info
+        global wx1_info
+        global wx2_info
+        global wx3_info
         global tides_info
-        weather_info = weather_fetcher.get_weather()
+        wx1_info = wx1_fetcher.get_weather()
+        wx2_info = wx2_fetcher.get_weather()
+        wx3_info = wx3_fetcher.get_weather()
         tides_info = tides_scraper.get_tides()
+         
         time.sleep(3 * 60 * 60)  # Sleep for 3 hours
 
 
@@ -158,7 +172,9 @@ def message_listener(packet, interface):
     global transmission_count
     global cooldown
     global kill_all_robots
-    global weather_info
+    global wx1_info
+    global wx2_info
+    global wx3_info
     global tides_info
     global DBFILENAME
     global DM_MODE
@@ -170,7 +186,7 @@ def message_listener(packet, interface):
         sender_id = packet["from"]
         logger.info(f"Message {packet['decoded']['text']} from {packet['from']}")
         logger.info(f"transmission count {transmission_count}")
-        
+
         if (
             transmission_count < 16 or DUTYCYCLE == False
             and (DM_MODE == 0 or str(packet["to"]) == MYNODE)
@@ -230,16 +246,62 @@ def message_listener(packet, interface):
                         wantAck=True,
                         destinationId=sender_id,
                     )
-            elif "#weather" in message:
+            elif "#wx1" in message:
                 transmission_count += 1
-                interface.sendText(weather_info, wantAck=True, destinationId=sender_id)
+                interface.sendText(wx1_info, wantAck=True, destinationId=sender_id)
+            elif "#wx2" in message:
+                transmission_count += 1
+                interface.sendText(wx2_info, wantAck=True, destinationId=sender_id)
+            elif "#wx3" in message:
+                transmission_count += 1
+                interface.sendText(wx3_info, wantAck=True, destinationId=sender_id)
             elif "#tides" in message:
                 transmission_count += 1
                 interface.sendText(tides_info, wantAck=True, destinationId=sender_id)
+
+            # THIS IS THE NEW PART TO HANDLE #flood COMMAND made by chatgpt
+            elif "#flood" in message:  # Trigger flood warnings 
+                transmission_count += 1
+                flood_scraper = FloodWarningsScraper()
+                flood_warnings = flood_scraper.get_flood_warnings()
+
+                if flood_warnings:
+                    interface.sendText(flood_warnings, wantAck=True, destinationId=sender_id)
+                else:
+                    interface.sendText("No current flood warnings available.", wantAck=True, destinationId=sender_id)
+     
+            elif "#wxwarn" in message:  # Trigger flood warnings made by chatgpt
+                transmission_count += 1
+                weather_scraper = WeatherWarningsScraper(region="wm")
+                weather_warnings = weather_scraper.get_weather_warnings()
+
+                if weather_warnings:
+                    interface.sendText(weather_warnings, wantAck=True, destinationId=sender_id)
+                else:
+                    interface.sendText("No current weather warnings available.", wantAck=True, destinationId=sender_id)#remove , destinationId=sender_id to send on longfast
+                    
+                    
             elif "#test" in message:
                 transmission_count += 1
-                interface.sendText("🟢 ACK", wantAck=True, destinationId=sender_id)
-            elif "#tst-detail" in message:
+                interface.sendText("THIS IS A TEST", wantAck=True, destinationId=sender_id)
+
+            elif "#hi" in message:
+                transmission_count += 1
+                interface.sendText("HELLO THERE", wantAck=True, destinationId=sender_id)
+
+            elif "#awake" in message:
+                transmission_count += 1
+                interface.sendText("yes the bot is awake", wantAck=True, destinationId=sender_id)
+
+            elif "#local" in message:
+                transmission_count += 1
+                interface.sendText("https://willp618.github.io/magenta-briana-21/", wantAck=True, destinationId=sender_id)
+
+            elif "#dx" in message:
+                transmission_count += 1
+                interface.sendText("https://willp618.github.io/crimson-margeaux-37/", wantAck=True, destinationId=sender_id)
+
+            elif "#ping" in message:
                 transmission_count += 1
                 testreply = "🟢 ACK."
                 if "hopStart" in packet:
@@ -249,6 +311,7 @@ def message_listener(packet, interface):
                         testreply += "Received from " + str(packet["hopStart"] - packet["hopLimit"]) + "hop(s) away at"
                 testreply += str(packet["rxRssi"]) + "dB, SNR: " + str(packet["rxSnr"]) + "dB (" + str(int(packet["rxSnr"] + 10 * 5)) + "%)"
                 interface.sendText(testreply, wantAck=True, destinationId=sender_id)
+
             elif "#whois #" in message:
                 message_parts = message.split("#")
                 transmission_count += 1

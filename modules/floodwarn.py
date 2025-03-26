@@ -1,0 +1,45 @@
+import defusedxml.ElementTree as ET #made by chatgpt blame the bot for errors
+from urllib.request import urlopen
+#change feed using this site https://environment.data.gov.uk/flood-widgets/rss-feeds.html
+class FloodWarningsScraper:
+    def __init__(self):
+        self.rss_url = "https://environment.data.gov.uk/flood-widgets/rss/feed-England.xml"
+
+    def get_flood_warnings(self):
+        try:
+            # Open the RSS feed URL and read its content
+            with urlopen(self.rss_url) as Client:
+                xml_page = Client.read()
+
+                # Parse the XML feed content
+                root = ET.fromstring(xml_page)
+
+                # Create a list to store the titles of the flood warnings
+                flood_warning_titles = []
+
+                # Iterate through all <item> elements and extract titles
+                for item in root.iter("item"):
+                    title = item.find("title").text
+                    if title:
+                        flood_warning_titles.append(title)
+
+                # Format the output to match the required format
+                formatted_output = ""
+                for title in flood_warning_titles:
+                    formatted_output += f"{title}\n"
+
+                return formatted_output
+
+        except Exception as e:
+            print("An error occurred:", e)
+            return ""
+
+# Example usage:
+scraper = FloodWarningsScraper()
+flood_warnings = scraper.get_flood_warnings()
+
+if flood_warnings:
+    print("Flood Warning Titles:")
+    print(flood_warnings)
+else:
+    print("No flood warnings found.")

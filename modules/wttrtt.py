@@ -1,7 +1,7 @@
 import requests
 
 
-class Wx1Fetcher:
+class Wx2Fetcher:
     def __init__(self, location):
         self.location = location
 
@@ -12,17 +12,17 @@ class Wx1Fetcher:
             response_text = response.text.replace("Partly ", "")
             response_text = response_text.replace("Light ", "")
             response_text = response_text.replace(" shower", "")
-            wx1_info = response_text.split()
-            location = wx1_info[0].strip()
-            condition = wx1_info[1].strip()
-            temperature = wx1_info[2].strip()
-            temperature = wx1_info[3].strip()
-            Humidity = wx1_info[4].strip()
-            wind = wx1_info[5].strip()
-            Precipitation = wx1_info[7].strip()
-            Pressure = wx1_info[6].strip()
-            dawn = wx1_info[-2].strip()
-            sunset = wx1_info[-1].strip()
+            wx2_info = response_text.split()
+            location = wx2_info[0].strip()
+            condition = wx2_info[1].strip()
+            temperature = wx2_info[2].strip()
+            temperature = wx2_info[3].strip()
+            Humidity = wx2_info[4].strip()
+            wind = wx2_info[5].strip()
+            Precipitation = wx2_info[7].strip()
+            Pressure = wx2_info[6].strip()
+            dawn = wx2_info[-2].strip()
+            sunset = wx2_info[-1].strip()
 
             emojis = {
                 "☁️": ["Cloudy", "Overcast", "cloudy"],
@@ -67,7 +67,7 @@ class Wx1Fetcher:
 
 
 # Example usage:
- #location = "Swansea"
-# weather_fetcher = Wx1Fetcher(location)
+# location = "Swansea"
+# weather_fetcher = WeatherFetcher(location)
 # weather_data = weather_fetcher.get_weather()
-#print(weather_data)
+# print(weather_data)
