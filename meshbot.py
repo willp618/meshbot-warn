@@ -68,6 +68,7 @@ from modules.wttrtt import Wx2Fetcher
 from modules.wttrttt import Wx3Fetcher
 from modules.floodwarn import FloodWarningsScraper
 from modules.weatherwarn import WeatherWarningsScraper
+from modules.pollenlevel import PollenLevels
 
 def find_serial_ports():
     # Use the list_ports module to get a list of available serial ports
@@ -95,6 +96,7 @@ DBFILENAME = ""
 DM_MODE = ""
 FIREWALL = ""
 DUTYCYCLE = ""
+POLLEN_LONLATS = ""
 
 with open("settings.yaml", "r") as file:
     settings = yaml.safe_load(file)
@@ -109,6 +111,7 @@ DBFILENAME = settings.get("DBFILENAME")
 DM_MODE = settings.get("DM_MODE")
 FIREWALL = settings.get("FIREWALL")
 DUTYCYCLE = settings.get("DUTYCYCLE")
+POLLEN_LONLATS = settings.get("POLLEN_LONLATS")
 
 logger.info(f"DUTYCYCLE: {DUTYCYCLE}")
 logger.info(f"DM_MODE: {DM_MODE}")
@@ -123,6 +126,8 @@ wx1_fetcher = Wx1Fetcher(LOCATION)
 wx2_fetcher = Wx2Fetcher(LOC2)
 wx3_fetcher = Wx3Fetcher(LOC3)
 tides_scraper = TidesScraper(TIDE_LOCATION)
+pollenlevel_fetcher = PollenLevels(POLLEN_LONLATS)
+
 bbs = BBS()
 transmission_count = 0
 cooldown = False
@@ -136,10 +141,12 @@ def refresh_data():
         global wx2_info
         global wx3_info
         global tides_info
+        global pollenlevel_info
         wx1_info = wx1_fetcher.get_weather()
         wx2_info = wx2_fetcher.get_weather()
         wx3_info = wx3_fetcher.get_weather()
         tides_info = tides_scraper.get_tides()
+        pollenlevel_info = pollenlevel_fetcher.get_pollen_levels()
          
         time.sleep(3 * 60 * 60)  # Sleep for 3 hours
 
@@ -456,6 +463,12 @@ def message_listener(packet, interface):
                     )
                     transmission_count += 1
                     kill_all_robots = 0
+            elif '#pollenlevel' in message:
+                transmission_count +=1
+                for location in pollenlevel_info:
+                    interface.sendText(location,wantAck=False,destinationId=sender_id)
+
+
         if transmission_count >= 11 and DUTYCYCLE == True:
             if not cooldown:
                 interface.sendText(
@@ -484,7 +497,7 @@ def main():
     parser = argparse.ArgumentParser(description="Meshbot a bot for Meshtastic devices")
     parser.add_argument("--port", type=str, help="Specify the serial port to probe")
     parser.add_argument("--db", type=str, help="Specify DB: mpowered or liam")
-    parser.add_argument("--host", type=str, help="Specify meshtastic host (IP address) if using API")
+    parser.add_argument("--host", type=str, help="Specify meshtastic host (IP address) if using API", default="192.168.70.16")
 
     args = parser.parse_args()
 
