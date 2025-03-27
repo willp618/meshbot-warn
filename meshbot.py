@@ -63,9 +63,7 @@ from modules.bbs import BBS
 from modules.tides import TidesScraper
 from modules.twin_cipher import TwinHexDecoder, TwinHexEncoder
 from modules.whois import Whois
-from modules.wttr import Wx1Fetcher
-from modules.wttrtt import Wx2Fetcher
-from modules.wttrttt import Wx3Fetcher
+from modules.wttr import WxFetcher
 from modules.floodwarn import FloodWarningsScraper
 from modules.weatherwarn import WeatherWarningsScraper
 from modules.pollenlevel import PollenLevels
@@ -122,9 +120,9 @@ logger.info(f"FIREWALL: {FIREWALL}")
 # except:
 #    logger.warning("Could not calculate location.  Using defaults")
 
-wx1_fetcher = Wx1Fetcher(LOCATION)
-wx2_fetcher = Wx2Fetcher(LOC2)
-wx3_fetcher = Wx3Fetcher(LOC3)
+wx1_fetcher = WxFetcher(LOCATION)
+wx2_fetcher = WxFetcher(LOC2)
+wx3_fetcher = WxFetcher(LOC3)
 tides_scraper = TidesScraper(TIDE_LOCATION)
 pollenlevel_fetcher = PollenLevels(POLLEN_LONLATS)
 
@@ -497,7 +495,7 @@ def main():
     parser = argparse.ArgumentParser(description="Meshbot a bot for Meshtastic devices")
     parser.add_argument("--port", type=str, help="Specify the serial port to probe")
     parser.add_argument("--db", type=str, help="Specify DB: mpowered or liam")
-    parser.add_argument("--host", type=str, help="Specify meshtastic host (IP address) if using API", default="192.168.70.16")
+    parser.add_argument("--host", type=str, help="Specify meshtastic host (IP address) if using API")
 
     args = parser.parse_args()
 

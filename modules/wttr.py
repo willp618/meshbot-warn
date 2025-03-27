@@ -1,6 +1,6 @@
 import requests
 
-class Wx1Fetcher:
+class WxFetcher:
     def __init__(self, location):
         self.location = location
 
@@ -10,22 +10,27 @@ class Wx1Fetcher:
         
         if response.status_code == 200:
             response_text = response.text.strip()  # Fetch the raw weather data
-            
+            #response_text = "oslo Clear +8°C +6°C 87% ↗10km/h 997hPa 0.0mm 0 05:54:23 18:51:03"
             # Split the response text into parts
             wx1_info = response_text.split()
             
             # Ensure we have enough data
             if len(wx1_info) < 10:
                 return "Error: Invalid weather data received."
-
+            
+            offset = 0
+            if len(wx1_info) == 11:
+                # We have a single word condition, offset by -1 for everything past index 2
+                offset = -1
+                
             location = wx1_info[0].strip()
-            condition = " ".join(wx1_info[1:3]).strip()  # Join multi-word conditions like "Heavy drizzle"
-            temperature = wx1_info[3].strip()
-            feels = wx1_info[4].strip()
-            humidity = wx1_info[5].strip()
-            wind = wx1_info[6].strip()
-            pressure = wx1_info[7].strip()
-            precipitation = wx1_info[8].strip()
+            condition = " ".join(wx1_info[1:3+offset]).strip()  # Join multi-word conditions like "Heavy drizzle"
+            temperature = wx1_info[3+offset].strip()
+            feels = wx1_info[4+offset].strip()
+            humidity = wx1_info[5+offset].strip()
+            wind = wx1_info[6+offset].strip()
+            pressure = wx1_info[7+offset].strip()
+            precipitation = wx1_info[8+offset].strip()
             
             dawn = wx1_info[-2].strip()
             sunset = wx1_info[-1].strip()
