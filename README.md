@@ -126,7 +126,8 @@ python meshbot.py --host meshtastic.local
 or
 python meshbot.py --host 192.168.0.100
 Bot interaction
-You bot will be accessible through the meshtastic mesh network through the node name. DM the bot/node and issue any of the following commands:
+You bot will be accessible through the meshtastic mesh network through the node name. 
+DM the bot/node and issue any of the following commands:
 
 - #test : receive a test message 
 - #ping : as #test above only more detail e.g snr,rssi, hop count (thanks to rohanki) CHANGE IT FROM #tst-detail BECAUSE PING JUST MAKES MORE SENSE
