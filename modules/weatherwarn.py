@@ -2,9 +2,10 @@ import defusedxml.ElementTree as ET   #made by chatgpt blame the bot for errors
 from urllib.request import urlopen
 
 class WeatherWarningsScraper:
-    def __init__(self, region=""):# CHANGE THIS FOR DIFFRENT REAGONS CURRENTLY WEST MIDS
+    def __init__(self, region):
+        self.region = region
         # Change the RSS feed URL to the weather warning URL
-        self.rss_url = f"https://www.metoffice.gov.uk/public/data/PWSCache/WarningsRSS/Region/{region}"
+        self.rss_url = f"https://www.metoffice.gov.uk/public/data/PWSCache/WarningsRSS/Region/{self.region}"
 
     def get_weather_warnings(self):
         try:
@@ -36,11 +37,12 @@ class WeatherWarningsScraper:
             return ""
 
 # Example usage:
-scraper = WeatherWarningsScraper(region="uk")  # You can change the region if needed
-weather_warnings = scraper.get_weather_warnings()
+#region="uk"
+#scraper = WeatherWarningsScraper(region)  # You can change the region if needed
+#weather_warnings = scraper.get_weather_warnings()
 
-if weather_warnings:
-    print("Weather Warning Titles:")
-    print(weather_warnings)
-else:
-    print("No weather warnings found.")
+#if weather_warnings:
+#    print("Weather Warning Titles:")
+#    print(weather_warnings)
+#else:
+#    print("No weather warnings found.")

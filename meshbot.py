@@ -63,7 +63,9 @@ from modules.bbs import BBS
 from modules.tides import TidesScraper
 from modules.twin_cipher import TwinHexDecoder, TwinHexEncoder
 from modules.whois import Whois
-from modules.wttr import WxFetcher
+#from modules.wttr import WxFetcher
+#from modules.wttrjson import WxFetcher
+from modules.wttr_json_wind_direction import WxFetcher
 from modules.floodwarn import FloodWarningsScraper
 from modules.weatherwarn import WeatherWarningsScraper
 from modules.pollenlevel import PollenLevels
@@ -84,9 +86,9 @@ logging.basicConfig(
 logger = logging.getLogger()
 
 # GLOBALS
-LOCATION = ""
-LOC2=""
-LOC3=""
+LOCATION1 = ""
+LOCATION2=""
+LOCATION3=""
 TIDE_LOCATION = ""
 MYNODE = ""
 MYNODES = ""
@@ -95,13 +97,14 @@ DM_MODE = ""
 FIREWALL = ""
 DUTYCYCLE = ""
 POLLEN_LONLATS = ""
+WXWARN_REGION = "" 
 
 with open("settings.yaml", "r") as file:
     settings = yaml.safe_load(file)
 
-LOCATION = settings.get("LOCATION")
-LOC2 = settings.get("LOC2")
-LOC3 = settings.get("LOC3")
+LOCATION1 = settings.get("LOCATION1")
+LOCATION2 = settings.get("LOCATION2")
+LOCATION3 = settings.get("LOCATION3")
 TIDE_LOCATION = settings.get("TIDE_LOCATION")
 MYNODE = settings.get("MYNODE")
 MYNODES = settings.get("MYNODES")
@@ -110,7 +113,7 @@ DM_MODE = settings.get("DM_MODE")
 FIREWALL = settings.get("FIREWALL")
 DUTYCYCLE = settings.get("DUTYCYCLE")
 POLLEN_LONLATS = settings.get("POLLEN_LONLATS")
-
+WXWARN_REGION = settings.get("WXWARN_REGION")
 logger.info(f"DUTYCYCLE: {DUTYCYCLE}")
 logger.info(f"DM_MODE: {DM_MODE}")
 logger.info(f"FIREWALL: {FIREWALL}")
@@ -120,12 +123,12 @@ logger.info(f"FIREWALL: {FIREWALL}")
 # except:
 #    logger.warning("Could not calculate location.  Using defaults")
 
-wx1_fetcher = WxFetcher(LOCATION)
-wx2_fetcher = WxFetcher(LOC2)
-wx3_fetcher = WxFetcher(LOC3)
+wx1_fetcher = WxFetcher(LOCATION1)
+wx2_fetcher = WxFetcher(LOCATION2)
+wx3_fetcher = WxFetcher(LOCATION3)
 tides_scraper = TidesScraper(TIDE_LOCATION)
 pollenlevel_fetcher = PollenLevels(POLLEN_LONLATS)
-
+wxwarn_scraper = WeatherWarningsScraper(WXWARN_REGION)
 bbs = BBS()
 transmission_count = 0
 cooldown = False
@@ -139,13 +142,14 @@ def refresh_data():
         global wx2_info
         global wx3_info
         global tides_info
-        global pollenlevel_info
+        global pollenlevel_inf0
+        global wxwarn_info
         wx1_info = wx1_fetcher.get_weather()
         wx2_info = wx2_fetcher.get_weather()
         wx3_info = wx3_fetcher.get_weather()
         tides_info = tides_scraper.get_tides()
         pollenlevel_info = pollenlevel_fetcher.get_pollen_levels()
-         
+        wxwarn_info = wxwarn_scraper.get_weather_warnings()
         time.sleep(3 * 60 * 60)  # Sleep for 3 hours
 
 
@@ -185,7 +189,8 @@ def message_listener(packet, interface):
     global DM_MODE
     global FIREWALL
     global DUTYCYCLE
-
+    global wxwarn_info
+    
     if packet is not None and packet["decoded"].get("portnum") == "TEXT_MESSAGE_APP":
         message = packet["decoded"]["text"].lower()
         sender_id = packet["from"]
@@ -253,13 +258,16 @@ def message_listener(packet, interface):
                     )
             elif "#wx1" in message:
                 transmission_count += 1
-                interface.sendText(wx1_info, wantAck=True, destinationId=sender_id)
+                time.sleep(15)
+                interface.sendText(wx1_info, wantAck=True)
             elif "#wx2" in message:
                 transmission_count += 1
-                interface.sendText(wx2_info, wantAck=True, destinationId=sender_id)
+                time.sleep(15)
+                interface.sendText(wx2_info, wantAck=True)
             elif "#wx3" in message:
                 transmission_count += 1
-                interface.sendText(wx3_info, wantAck=True, destinationId=sender_id)
+                time.sleep(15)
+                interface.sendText(wx3_info, wantAck=True)
             elif "#tides" in message:
                 transmission_count += 1
                 interface.sendText(tides_info, wantAck=True, destinationId=sender_id)
@@ -275,16 +283,16 @@ def message_listener(packet, interface):
                 else:
                     interface.sendText("No current flood warnings available.", wantAck=True, destinationId=sender_id)
      
-            elif "#wxwarn" in message:  # Trigger flood warnings made by chatgpt
+            elif "#wxwarn" in message:  # Trigger weather warnings
                 transmission_count += 1
-                weather_scraper = WeatherWarningsScraper(region="wm")
-                weather_warnings = weather_scraper.get_weather_warnings()
+                  # Fetch weather warnings from the wxwarn_scraper
+                weather_warnings = wxwarn_scraper.get_weather_warnings()
 
                 if weather_warnings:
                     interface.sendText(weather_warnings, wantAck=True, destinationId=sender_id)
                 else:
-                    interface.sendText("No current weather warnings available.", wantAck=True, destinationId=sender_id)#remove , destinationId=sender_id to send on longfast
-                    
+                    interface.sendText("No current weather warnings available.", wantAck=True, destinationId=sender_id)
+
                     
             elif "#test" in message:
                 transmission_count += 1

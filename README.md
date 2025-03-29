@@ -1,9 +1,29 @@
 # MeshBot
 
 ![Meshbot](./img/meshbot.png)
-THIS IS A VERSION THAT CAN PULL FLOOD WARNINGS FROM https://environment.data.gov.uk/flood-widgets/rss-feeds.html 
-THE CODE IS MIXTURE OF MY OWN AND CHATGPT 
-BE WARNED IT MIGHT NOT WORK RIGHT
+
+
+
+- THIS IS A VERSION THAT CAN PULL FLOOD WARNINGS FROM https://environment.data.gov.uk/flood---widgets/rss-feeds.html 
+- AS WELL AS METOFFICE WEATHER WARNINGS 
+- THE CODE IS MIXTURE OF OWN WORK AND CHATGPT 
+- BE WARNED IT MIGHT NOT WORK RIGHT
+- THERE IS A LIMITATION WITH THE WEATHER CODE DUE TO HOW WWO GIVE THE DATA TO MTTR.IN WHEN USING A JSON OUTPUT IT WILL GET DATA FOR THE CLOSEST WEATHER STATION TO THE LOCATION GIVEN UNDER LOCATION1,2,3 
+- CURRENTLY IT IS SETUP TO PULL FROM wttr_wind_direction.py THIS OUTPUTS WIND DIRECTION AS AN ARROW
+- from modules.bbs import BBS
+- from modules.tides import TidesScraper
+- from modules.twin_cipher import TwinHexDecoder, TwinHexEncoder
+- from modules.whois import Whois
+- #from modules.wttr import WxFetcher
+- #from modules.wttrjson import WxFetcher
+- from modules.wttr_json_wind_direction import WxFetcher
+- from modules.floodwarn import FloodWarningsScraper
+- from modules.weatherwarn import WeatherWarningsScraper
+- from modules.pollenlevel import PollenLevels
+
+- CHANGE TO EITHER WTTR FOR NON JSON OUTPUT OR WTTRJSON FOR JSON OUTPUT WITHOUT WIND DIRECTION (IF YOU RUN INTO MESSAGE LIMIT ERRORS) 
+- 
+
 MeshBot is an OpenSource Python program designed to run on computers with a connected Meshtastic device, allowing users to send and receive messages efficiently over a mesh network.
 
 Our Mission: 
@@ -35,17 +55,42 @@ Install the required dependencies:
 pip install -r requirements.txt
 Connect your Meshtastic device to your computer via USB and run the program
 python ./meshbot.py
+
+
 Configuration (NEW)
 We have revamped the configuration, there is now a ''settings.yaml'' file, which we believe makes the program easier to manage
 
 Example Content:
 
----
-LOCATION: "kidderminster" #wx1
-LOC2: "Bridgnorth" #wx2
-LOC3: "worcester"#wx3
+- LOCATIONS FOR WX REPORTS USING WTTR.IN JSON 
+LOCATION1: "london" #wx1
+LOCATION2: "paris" #wx2
+LOCATION3: "new york" #wx3
+
+- LON LAT FOR POLLEN COUNT
+POLLEN_LONLATS:
+  - "51.503400,-0.127600"
+
+- REGION FOR METOFFICE WEATHER WARNINGS 
+- goto https://weather.metoffice.gov.uk/guides/rss open link for region you want
+- example for West Midlands
+- https://weather.metoffice.gov.uk/public/data/PWSCache/WarningsRSS/Region/wm
+- copy the region code to WXWARN_REGION in this case it will be wm
+WXWARN_REGION: "uk"
+
+- RSS FEED FOR FLOOD WARINGS 
+- GO TO https://environment.data.gov.uk/flood-widgets/rss-feeds.html 
+- RIGHT CLICK ON THE FEED YOU WANT (ENGLAND ONLY DUE TO THE UNIQUE WAY THE UK IS RUN)
+- COPY LINK ADDRESS BELOW BY DEFAULT IT WILL PUL FROM THE ENGLAND FEED    
+
+FLOOD_RSS_FEED_URL: "https://environment.data.gov.uk/flood-widgets/rss/feed-Shropshire.xml"
+
+- TIDE LOCATION
 TIDE_LOCATION: "Swansea"
-MYNODE: "3663493700"
+
+
+- add node id number from liam cottles site
+MYNODE: "0987654321" #add node id number from liam cottles site 
 MYNODES:
   - "3663493700"
   - "1234567890"
@@ -83,20 +128,21 @@ python meshbot.py --host 192.168.0.100
 Bot interaction
 You bot will be accessible through the meshtastic mesh network through the node name. DM the bot/node and issue any of the following commands:
 
-#test : receive a test message CHANGED FOR LOCALS SORRY
-#ping : as #test above only more detail e.g snr,rssi, hop count (thanks to rohanki) CHANGE IT FROM #tst-detail BECAUSE PING JUST MAKES MORE SENSE
-#wx1-3 : local weather report WITH MORE DETAIL THAN BEFORE
-#tides : tide info (dont forget to change the default town in the source)
-#whois #xxxx : retrieve name and node info for a node based on last 4 chars of address
-#bbs any : do I have any messages?
-#bbs post !address message : post a message on the bbs for a given user at !address
-#bbs get : retrieve your message(s) left by another user(s)
-#flood GETS FLOOD WARNINGS VIA RSS
-#wxwarn GETS WX WARNINGS VIA RSS MIGHT NOT WORK
-#hi SENDS "hello there"
-#local SENDS https://willp618.github.io/magenta-briana-21/
-#dx SENDS https://willp618.github.io/crimson-margeaux-37/
-#awake SENDS "yes the bot is awake" done as a test thing when i was working out things
+- #test : receive a test message 
+- #ping : as #test above only more detail e.g snr,rssi, hop count (thanks to rohanki) CHANGE IT FROM #tst-detail BECAUSE PING JUST MAKES MORE SENSE
+- #wx1-3 : local weather report WITH MORE DETAIL THAN BEFORE
+- #tides : tide info (dont forget to change the default town in the source)
+- #whois #xxxx : retrieve name and node info for a node based on last 4 chars of address
+- #bbs any : do I have any messages?
+- #bbs post !address message : post a message on the bbs for a given user at !address
+- #bbs get : retrieve your message(s) left by another user(s)
+- #flood GETS FLOOD WARNINGS VIA RSS FROM DFERA ENGLAND ONLY 
+- #wxwarn GETS WX WARNINGS VIA RSS FROM METOFFICE
+- #pollenlevel GETS POLLENLEVEL VIA open-meteo.com API
+- #hi SENDS "hello there"
+- #local SENDS [https://willp618.github.io/magenta-briana-21/]
+- #dx SENDS [https://willp618.github.io/crimson-margeaux-37/]
+- #awake SENDS "yes the bot is awake" done as a test thing when i was working out things
 Contributors
 868meshbot
 Acknowledgements

@@ -1,9 +1,14 @@
-import defusedxml.ElementTree as ET #made by chatgpt blame the bot for errors
+import defusedxml.ElementTree as ET  # made by chatgpt blame the bot for errors
 from urllib.request import urlopen
-#change feed using this site https://environment.data.gov.uk/flood-widgets/rss-feeds.html
+import yaml  # To load the RSS URL from the settings.yaml file
+
 class FloodWarningsScraper:
     def __init__(self):
-        self.rss_url = "https://environment.data.gov.uk/flood-widgets/rss/feed-England.xml"
+        # Load RSS URL from settings.yaml file
+        with open('settings.yaml', 'r') as file:
+            settings = yaml.safe_load(file)
+            self.rss_url = settings.get("FLOOD_RSS_FEED_URL", "https://environment.data.gov.uk/flood-widgets/rss/feed-England.xml")
+            # Fallback to the default URL if the setting is not found.
 
     def get_flood_warnings(self):
         try:

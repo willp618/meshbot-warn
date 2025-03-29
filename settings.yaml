@@ -1,15 +1,42 @@
 ---
-LOCATION: "kidderminster" #wx1
-LOC2: "Bridgnorth" #wx2
-LOC3: "worcester" #wx3
+#LOCATIONS FOR WX REPORTS USING WTTR.IN JSON NOTE IT WILL PULL FROM CLOSEST STATION DUE TO LIMITATIONS OF THE BACKEND WTTR.IN USES WHEN USING THE JSON OUTPUT
+LOCATION1: "kidderminster" #wx1
+LOCATION2: "Bridgnorth" #wx2
+LOCATION3: "halesowen" #wx3
+
+# LON LAT FOR POLLEN COUNT
+POLLEN_LONLATS:
+  - "52.002259,-2.1443099"
+
+# REGION FOR METOFFICE WEATHER WARNINGS 
+# goto https://weather.metoffice.gov.uk/guides/rss open link for region you want
+# example for West Midlands
+# https://weather.metoffice.gov.uk/public/data/PWSCache/WarningsRSS/Region/wm
+# copy the region code to WXWARN_REGION in this case it will be wm BY DEFAULT IT SET TO UK
+WXWARN_REGION: "uk"
+
+# RSS FEED FOR FLOOD WARINGS 
+# GO TO https://environment.data.gov.uk/flood-widgets/rss-feeds.html 
+# RIGHT CLICK ON THE FEED YOU WANT (ENGLAND ONLY DUE TO THE UNIQUE WAY THE UK IS RUN)
+#COPY LINK ADDRESS BELOW BY DEFAULT IT WILL PUL FROM THE ENGLAND FEED    
+FLOOD_RSS_FEED_URL: "https://environment.data.gov.uk/flood-widgets/rss/feed-Shropshire.xml"
+
+#TIDE LOCATION
 TIDE_LOCATION: "Swansea"
+
+
+#add node id number from liam cottles site
 MYNODE: "862153020" #add node id number from liam cottles site 
 MYNODES:
   - "3663493700"
   - "1234567890"
+  
+  
 DBFILENAME: "./db/nodes2.db"
+
 DM_MODE: True
+
 FIREWALL: False
+
 DUTYCYCLE: False #yes i turn it off while testing as it choked the bot too much
-POLLEN_LONLATS:
-  - "52.002259,-2.1443099"
+

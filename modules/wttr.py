@@ -60,14 +60,14 @@ class WxFetcher:
             # Prepare the output string
             output = f"{location}\n"
             output += f"{selected_emoji} {condition}\n"
-            output += f"Temperature 🌡️ {temperature}\n"
-            output += f"Feels like 🌡️ {feels}\n"
-            output += f"Humidity 💧 {humidity}\n"
-            output += f"Wind speed 💨 {wind}\n"
+            output += f"Temperature {temperature}\n"
+            output += f"Feels like {feels}\n"
+            output += f"Humidity {humidity}\n"
+            output += f"Wind speed {wind}\n"
             output += f"Precipitation 🌨️ {precipitation}\n"
-            output += f"Pressure ⏲️ {pressure}\n"
-            output += f"Dawn 🌞 {dawn}\n"
-            output += f"Sunset 🌛 {sunset}\n"
+            output += f"Pressure {pressure}\n"
+            output += f"sunrise {dawn}\n"
+            output += f"Sunset {sunset}\n"
 
             return output
         else:
@@ -75,8 +75,8 @@ class WxFetcher:
 
 
 # Example usage uncomment to run by its self for testing
-#location = "kidderminster"
-#weather_fetcher = Wx1Fetcher(location)
-#weather_report = weather_fetcher.get_weather()
-#print(weather_report)
+location = "bridgnorth"
+weather_fetcher = WxFetcher(location)
+weather_report = weather_fetcher.get_weather()
+print(weather_report)
 
