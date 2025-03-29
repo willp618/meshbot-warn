@@ -60,36 +60,36 @@ python ./meshbot.py
 Configuration (NEW)
 We have revamped the configuration, there is now a ''settings.yaml'' file, which we believe makes the program easier to manage
 
-Example Content:
+## Example Content:
 
-- LOCATIONS FOR WX REPORTS USING WTTR.IN JSON 
+## LOCATIONS FOR WX REPORTS USING WTTR.IN JSON 
 LOCATION1: "london" #wx1
 LOCATION2: "paris" #wx2
 LOCATION3: "new york" #wx3
 
-- LON LAT FOR POLLEN COUNT
+## LON LAT FOR POLLEN COUNT
 POLLEN_LONLATS:
   - "51.503400,-0.127600"
 
-- REGION FOR METOFFICE WEATHER WARNINGS 
+## REGION FOR METOFFICE WEATHER WARNINGS 
 - goto https://weather.metoffice.gov.uk/guides/rss open link for region you want
 - example for West Midlands
 - https://weather.metoffice.gov.uk/public/data/PWSCache/WarningsRSS/Region/wm
 - copy the region code to WXWARN_REGION in this case it will be wm
 WXWARN_REGION: "uk"
 
-- RSS FEED FOR FLOOD WARINGS 
+## RSS FEED FOR FLOOD WARINGS 
 - GO TO https://environment.data.gov.uk/flood-widgets/rss-feeds.html 
 - RIGHT CLICK ON THE FEED YOU WANT (ENGLAND ONLY DUE TO THE UNIQUE WAY THE UK IS RUN)
 - COPY LINK ADDRESS BELOW BY DEFAULT IT WILL PUL FROM THE ENGLAND FEED    
 
 FLOOD_RSS_FEED_URL: "https://environment.data.gov.uk/flood-widgets/rss/feed-Shropshire.xml"
 
-- TIDE LOCATION
+## TIDE LOCATION
 TIDE_LOCATION: "Swansea"
 
 
-- add node id number from liam cottles site
+## add node id number from liam cottles site
 MYNODE: "0987654321" #add node id number from liam cottles site 
 MYNODES:
   - "3663493700"
@@ -100,13 +100,13 @@ FIREWALL: True
 DUTYCYCLE: True
 Description
 
-LOCATION and TIDE_LOCATION = These should be obvious
-MYNODE = The hw address of the node connected in int/number form. This is so the bot only responds to DMs GET THIS FROM LIAMS COTTLES MAP UNDER NODE ID
-MYNODES = A list of nodes (in int/number form) that are permitted to interact with the bot
-DBFILENAME = Configure which user database file to use by default
-DM_MODE = True: Only respond to DMs; False: responds to all traffic
-FIREWALL = True: Only respond to MYNODES; False: responds to all traffic
-DUTYCYCLE: True: Respect 10% Dutycycle in EU, false to disable for countries without Dutycycle
+- LOCATION and TIDE_LOCATION = These should be obvious
+- MYNODE = The hw address of the node connected in int/number form. This is so the bot only responds to DMs GET THIS FROM LIAMS COTTLES MAP UNDER NODE ID
+- MYNODES = A list of nodes (in int/number form) that are permitted to interact with the bot
+- DBFILENAME = Configure which user database file to use by default
+- DM_MODE = True: Only respond to DMs; False: responds to all traffic
+- FIREWALL = True: Only respond to MYNODES; False: responds to all traffic
+- DUTYCYCLE: True: Respect 10% Dutycycle in EU, false to disable for countries without Dutycycle
 Usage
 Run the MeshBot program:
 
