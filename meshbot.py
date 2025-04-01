@@ -142,7 +142,7 @@ def refresh_data():
         global wx2_info
         global wx3_info
         global tides_info
-        global pollenlevel_inf0
+        global pollenlevel_info
         global wxwarn_info
         wx1_info = wx1_fetcher.get_weather()
         wx2_info = wx2_fetcher.get_weather()
@@ -472,7 +472,7 @@ def message_listener(packet, interface):
             elif '#pollenlevel' in message:
                 transmission_count +=1
                 for location in pollenlevel_info:
-                    interface.sendText(location,wantAck=False,destinationId=sender_id)
+                    interface.sendText(location[:-1],wantAck=False,destinationId=sender_id) # added :-1 to remove final new line. Save one more character of space!
 
 
         if transmission_count >= 11 and DUTYCYCLE == True:
@@ -503,7 +503,7 @@ def main():
     parser = argparse.ArgumentParser(description="Meshbot a bot for Meshtastic devices")
     parser.add_argument("--port", type=str, help="Specify the serial port to probe")
     parser.add_argument("--db", type=str, help="Specify DB: mpowered or liam")
-    parser.add_argument("--host", type=str, help="Specify meshtastic host (IP address) if using API")
+    parser.add_argument("--host", type=str, help="Specify meshtastic host (IP address) if using API",default="192.168.70.16")
 
     args = parser.parse_args()
 
