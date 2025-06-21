@@ -14,7 +14,7 @@ meshbot.py: A message bot designed for Meshtastic, providing information from mo
 Author:
 - Andy
 - April 2024
-- Fixed By KD & Portex 2025
+
 MIT License
 
 Copyright (c) 2024 Andy
@@ -63,13 +63,12 @@ from modules.bbs import BBS
 from modules.tides import TidesScraper
 from modules.twin_cipher import TwinHexDecoder, TwinHexEncoder
 from modules.whois import Whois
-from modules.wttr_openmeteomapcode import WxFetcher
+#from modules.wttr import WxFetcher
+#from modules.wttrjson import WxFetcher
+from modules.wttr_json_wind_direction import WxFetcher
 from modules.floodwarn import FloodWarningsScraper
 from modules.weatherwarn import WeatherWarningsScraper
-
-#chose from pollen or aqi 
-#from modules.pollen import PollenLevels
-from modules.aqi import PollenLevels
+from modules.pollenlevel import PollenLevels
 
 def find_serial_ports():
     # Use the list_ports module to get a list of available serial ports
@@ -87,16 +86,9 @@ logging.basicConfig(
 logger = logging.getLogger()
 
 # GLOBALS
-#these are for the wx side of things
 LOCATION1 = ""
 LOCATION2=""
 LOCATION3=""
-LOCATION4=""
-LOCATION5=""
-LOCATION6=""
-POLLEN_LONLATS = ""
-WXWARN_REGION = "" 
-#non weather related below
 TIDE_LOCATION = ""
 MYNODE = ""
 MYNODES = ""
@@ -104,7 +96,8 @@ DBFILENAME = ""
 DM_MODE = ""
 FIREWALL = ""
 DUTYCYCLE = ""
-
+POLLEN_LONLATS = ""
+WXWARN_REGION = "" 
 
 with open("settings.yaml", "r") as file:
     settings = yaml.safe_load(file)
@@ -112,9 +105,6 @@ with open("settings.yaml", "r") as file:
 LOCATION1 = settings.get("LOCATION1")
 LOCATION2 = settings.get("LOCATION2")
 LOCATION3 = settings.get("LOCATION3")
-LOCATION4 = settings.get("LOCATION4")
-LOCATION5 = settings.get("LOCATION5")
-LOCATION6 = settings.get("LOCATION6")
 TIDE_LOCATION = settings.get("TIDE_LOCATION")
 MYNODE = settings.get("MYNODE")
 MYNODES = settings.get("MYNODES")
@@ -136,9 +126,6 @@ logger.info(f"FIREWALL: {FIREWALL}")
 wx1_fetcher = WxFetcher(LOCATION1)
 wx2_fetcher = WxFetcher(LOCATION2)
 wx3_fetcher = WxFetcher(LOCATION3)
-wx4_fetcher = WxFetcher(LOCATION4)
-wx5_fetcher = WxFetcher(LOCATION5)
-wx6_fetcher = WxFetcher(LOCATION6)
 tides_scraper = TidesScraper(TIDE_LOCATION)
 pollenlevel_fetcher = PollenLevels(POLLEN_LONLATS)
 wxwarn_scraper = WeatherWarningsScraper(WXWARN_REGION)
@@ -154,18 +141,12 @@ def refresh_data():
         global wx1_info
         global wx2_info
         global wx3_info
-        global wx4_info
-        global wx5_info
-        global wx6_info
         global tides_info
         global pollenlevel_info
         global wxwarn_info
         wx1_info = wx1_fetcher.get_weather()
         wx2_info = wx2_fetcher.get_weather()
         wx3_info = wx3_fetcher.get_weather()
-        wx4_info = wx4_fetcher.get_weather()
-        wx5_info = wx5_fetcher.get_weather()
-        wx6_info = wx6_fetcher.get_weather()
         tides_info = tides_scraper.get_tides()
         pollenlevel_info = pollenlevel_fetcher.get_pollen_levels()
         wxwarn_info = wxwarn_scraper.get_weather_warnings()
@@ -203,9 +184,6 @@ def message_listener(packet, interface):
     global wx1_info
     global wx2_info
     global wx3_info
-    global wx4_info
-    global wx5_info
-    global wx6_info
     global tides_info
     global DBFILENAME
     global DM_MODE
@@ -281,44 +259,29 @@ def message_listener(packet, interface):
             elif "#wx1" in message:
                 transmission_count += 1
                 time.sleep(15)
-                interface.sendText(wx1_info, wantAck=True, destinationId=sender_id)
+                interface.sendText(wx1_info, wantAck=True)
             elif "#wx2" in message:
                 transmission_count += 1
                 time.sleep(15)
-                interface.sendText(wx2_info, wantAck=True, destinationId=sender_id)
+                interface.sendText(wx2_info, wantAck=True)
             elif "#wx3" in message:
                 transmission_count += 1
                 time.sleep(15)
-                interface.sendText(wx3_info, wantAck=True, destinationId=sender_id)
-            elif "#wx4" in message:
-                transmission_count += 1
-                time.sleep(15)
-                interface.sendText(wx4_info, wantAck=True, destinationId=sender_id)
-            elif "#wx5" in message:
-                transmission_count += 1
-                time.sleep(15)
-                interface.sendText(wx5_info, wantAck=True, destinationId=sender_id)
-            elif "#wx6" in message:
-                transmission_count += 1
-                time.sleep(15)
-                interface.sendText(wx6_info, wantAck=True, destinationId=sender_id)
-                
+                interface.sendText(wx3_info, wantAck=True)
             elif "#tides" in message:
                 transmission_count += 1
-                time.sleep(15)
                 interface.sendText(tides_info, wantAck=True, destinationId=sender_id)
 
             # THIS IS THE NEW PART TO HANDLE #flood COMMAND made by chatgpt
             elif "#flood" in message:  # Trigger flood warnings 
                 transmission_count += 1
-                time.sleep(15)
                 flood_scraper = FloodWarningsScraper()
                 flood_warnings = flood_scraper.get_flood_warnings()
 
                 if flood_warnings:
-                    interface.sendText(flood_warnings, wantAck=True)
+                    interface.sendText(flood_warnings, wantAck=True, destinationId=sender_id)
                 else:
-                    interface.sendText("No current flood warnings available.", wantAck=True)
+                    interface.sendText("No current flood warnings available.", wantAck=True, destinationId=sender_id)
      
             elif "#wxwarn" in message:
                 transmission_count += 1
@@ -326,59 +289,39 @@ def message_listener(packet, interface):
 
                 if weather_warnings:
         # Send each warning separately (split by newline or your delimiter)
-                  warnings = weather_warnings.strip().split("\n\n")
-                  for warn in warnings:
-                      if warn.strip():  # Only send non-empty warnings
-                          interface.sendText(warn.strip(), wantAck=True)
-                          time.sleep(15)  # Delay to stay within Meshtastic's duty cycle
-                          transmission_count += 1
+                   warnings = weather_warnings.strip().split("\n\n")  # Assuming double newlines separate each
+                for warn in warnings:
+                if warn.strip():  # Only send non-empty warnings
+                   interface.sendText(warn.strip(), wantAck=True, destinationId=sender_id)
+                   time.sleep(15)  # Delay to stay within Meshtastic's duty cycle
+                   transmission_count += 1
                 else:
-                    interface.sendText("No current weather warnings available.", wantAck=True)
-                    
-            
+                    interface.sendText("No current weather warnings available.", wantAck=True, destinationId=sender_id)
 
  
                     
             elif "#test" in message:
                 transmission_count += 1
-                time.sleep(5)
                 interface.sendText("THIS IS A TEST", wantAck=True, destinationId=sender_id)
-                
-                 
-            elif "#discord" in message:
-                transmission_count += 1
-                time.sleep(5)
-                interface.sendText("Join West Mids Mesh on Discord https://discord.gg/JUKF6YxBKa", wantAck=True, destinationId=sender_id)
-                 
-            elif "#help" in message:
-                transmission_count += 1
-                time.sleep(5)
-                interface.sendText("commands all begin with hashtag-symbol ,test ,help ,wx1-6 ,wxwarn ,flood ,ping ,local ,dx ,pollen ,discord ", wantAck=True, destinationId=sender_id)
-                
 
             elif "#hi" in message:
                 transmission_count += 1
-                time.sleep(5)
                 interface.sendText("HELLO THERE", wantAck=True, destinationId=sender_id)
 
             elif "#awake" in message:
                 transmission_count += 1
-                time.sleep(5)
                 interface.sendText("yes the bot is awake", wantAck=True, destinationId=sender_id)
 
             elif "#local" in message:
                 transmission_count += 1
-                time.sleep(5)
-                interface.sendText("https://willp618.github.io/magenta-briana-21/", wantAck=True)
+                interface.sendText("https://willp618.github.io/magenta-briana-21/", wantAck=True, destinationId=sender_id)
 
             elif "#dx" in message:
                 transmission_count += 1
-                time.sleep(5)
-                interface.sendText("https://willp618.github.io/crimson-margeaux-37/", wantAck=True)
+                interface.sendText("https://willp618.github.io/crimson-margeaux-37/", wantAck=True, destinationId=sender_id)
 
             elif "#ping" in message:
                 transmission_count += 1
-                time.sleep(5)
                 testreply = "🟢 ACK."
                 if "hopStart" in packet:
                     if (packet["hopStart"] - packet["hopLimit"]) == 0:
@@ -532,8 +475,7 @@ def message_listener(packet, interface):
                     )
                     transmission_count += 1
                     kill_all_robots = 0
-                    
-            elif '#pollen' in message:
+            elif '#pollenlevel' in message:
                 transmission_count +=1
                 for location in pollenlevel_info:
                     interface.sendText(location[:-1],wantAck=False,destinationId=sender_id) # added :-1 to remove final new line. Save one more character of space!

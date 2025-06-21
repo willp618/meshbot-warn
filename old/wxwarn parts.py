@@ -41,11 +41,11 @@ class WeatherWarningsScraper:
                     abbreviated = self.abbreviate_description(description)
                     warnings_output.append(abbreviated)
 
-                return "\n\n".join(warnings_output)
+                return warnings_output  # Return list instead of joined string
 
         except Exception as e:
             print("An error occurred:", e)
-            return ""
+            return []
 
 # Example usage:
 region = "wm"
@@ -53,6 +53,8 @@ scraper = WeatherWarningsScraper(region)
 weather_warnings = scraper.get_weather_warnings()
 
 if weather_warnings:
-    print("WXwarn:", weather_warnings)
+    print("WXwarns:")
+    for msg in weather_warnings:
+        print("-", msg)
 else:
     print("No weather warnings found.")

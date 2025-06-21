@@ -3,6 +3,9 @@
 LOCATION1: "kidderminster" #wx1
 LOCATION2: "Bridgnorth" #wx2
 LOCATION3: "halesowen" #wx3
+LOCATION4: "frankley"  #wx4
+LOCATION5: "worcester,gb" #wx5
+LOCATION6: "aerial acres" #wx6 for testing american
 
 # LON LAT FOR POLLEN COUNT
 POLLEN_LONLATS:
@@ -13,13 +16,13 @@ POLLEN_LONLATS:
 # example for West Midlands
 # https://weather.metoffice.gov.uk/public/data/PWSCache/WarningsRSS/Region/wm
 # copy the region code to WXWARN_REGION in this case it will be wm BY DEFAULT IT SET TO UK
-WXWARN_REGION: "uk"
+WXWARN_REGION: "wm"
 
 # RSS FEED FOR FLOOD WARINGS 
 # GO TO https://environment.data.gov.uk/flood-widgets/rss-feeds.html 
 # RIGHT CLICK ON THE FEED YOU WANT (ENGLAND ONLY DUE TO THE UNIQUE WAY THE UK IS RUN)
 #COPY LINK ADDRESS BELOW BY DEFAULT IT WILL PUL FROM THE ENGLAND FEED    
-FLOOD_RSS_FEED_URL: "https://environment.data.gov.uk/flood-widgets/rss/feed-Shropshire.xml"
+FLOOD_RSS_FEED_URL: "https://environment.data.gov.uk/flood-widgets/rss/feed-England.xml"
 
 #TIDE LOCATION
 TIDE_LOCATION: "Swansea"
